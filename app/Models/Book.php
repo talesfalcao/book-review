@@ -39,7 +39,7 @@ class Book extends Model
         return $query->withAvg([
             'reviews' => fn (Builder $q) => $this->dateRangeFilter($q, $from, $to)
         ], 'rating')
-                    ->orderBy('reviews_avg_rating', 'desc');
+                    ->orderBy('reviews_avg_rating', 'DESC');
     }
 
     public function scopeMinReviews(Builder $query, int $minReviews) : Builder {
@@ -55,5 +55,33 @@ class Book extends Model
         } elseif($from && $to) {
             $query->whereBetween('created_at', [$from, $to]);
         }
+    }
+
+    public function scopePopularLastMonth(Builder $query): Builder {
+        return $query
+                ->popular(now()->subMonth(), now())
+                ->highestRated(now()->subMonth(), now())
+                ->minReviews(2);
+    }
+
+    public function scopePopularLastSixMonths(Builder $query): Builder {
+        return $query
+                ->popular(now()->subMonths(6), now())
+                ->highestRated(now()->subMonths(6), now())
+                ->minReviews(5);
+    }
+
+    public function scopeHihestRatedLastMonth(Builder $query): Builder {
+        return $query
+                ->highestRated(now()->subMonth(), now())
+                ->popular(now()->subMonth(), now())
+                ->minReviews(2);
+    }
+
+    public function scopeHihestRatedLastSixMonths(Builder $query): Builder {
+        return $query
+                ->highestRated(now()->subMonths(6), now())
+                ->popular(now()->subMonths(6), now())
+                ->minReviews(5);
     }
 }
